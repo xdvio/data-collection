@@ -2,9 +2,14 @@
 
 A CLI for data-collection.
 
-## Customizing your CLI
+## Running the CLI
 
-Check out the documentation at https://github.com/infinitered/gluegun/tree/master/docs.
+```shell
+$ yarn install
+$ yarn start
+```
+
+Currently, this loads some transactions from the faucet account and writes a summary to `./transactions.csv`
 
 ## Publishing to NPM
 
