@@ -34,6 +34,7 @@
   "dependencies": {
     "export-to-csv": "^0.2.1",
     "gluegun": "latest",
+    "csv-parser": "^3.0.0",
     "xrpl": "^2.0.0"
   },
   "devDependencies": {
