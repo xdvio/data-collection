@@ -12,20 +12,36 @@ const command: GluegunCommand = {
         return
     }
 
-    const results = [];
     const txFile = 'transactions.csv'
 
-    fs.createReadStream(txFile)
-    .pipe(csv())
-    .on('data', (data) => results.push(data))
-    .on('end', () => {
-        if(results.length === 0) {
-            console.log(`No data found in ${txFile}`)
-        } else {
-            console.log(`Done reading in ${results.length} lines of data!`)
-            console.log(results[1])
-        }
-    });
+    const allData: any = await new Promise((resolve, reject) => {
+      const results = [];
+
+      fs.createReadStream(txFile)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', () => {
+          if(results.length === 0) {
+              console.log(`No data found in ${txFile}`)
+          } else {
+              console.log(`Done reading in ${results.length} lines of data!`)
+          }
+          resolve(results)
+      })
+    })
+
+    const destinations = allData.map(result => result.Destination)
+    const uniqueDestinations = new Set(destinations)
+    console.log(`Total unique addresses that interacted with the faucet = ${uniqueDestinations.size}`)
+
+    /*let dataGroupedByDay = {} 
+    allData.forEach(result => {
+      dataGroupedByDay[result.date].push(result)
+    })*/
+    
+
+
+    // TODO: Make this configurable to target either testnet or devnet, with nice messages throughout to remind people, + Saving to different data sets
 
 
   }
