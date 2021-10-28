@@ -2,6 +2,38 @@ import { GluegunCommand } from 'gluegun'
 import * as fs from 'fs'
 import * as csv from 'csv-parser'
 import { DevnetDataFilename, TestnetDataFilename } from '../types'
+/*
+function decodeTutorialMemos(memos): 
+{ path: string, button: string, step: string, totalsteps: string } {
+  if(memos == null) {
+    return null
+  }
+
+  // Documented here: https://github.com/XRPLF/xrpl-dev-portal/blob/master/tool/INTERACTIVE_TUTORIALS_README.md#memos
+  const output = {
+    path: null,
+    button: null,
+    step: null,
+    totalsteps: null,
+  }
+
+  const memoData = JSON.parse(memos.MemoData)
+
+  console.log("Has a memo!")
+  if(memos.MemoType === 0x68747470733A2F2F6769746875622E636F6D2F5852504C462F7872706C2D6465762D706F7274616C2F626C6F622F6D61737465722F746F6F6C2F494E5445524143544956455F5455544F5249414C535F524541444D452E6D64) {
+    console.log("Tutorial transaction found!")
+    console.log(memoData)
+  }
+
+  if(memoData != null) {
+    output.path = memoData.path;
+    output.button = memoData.button;
+    output.step = memoData.step;
+    output.totalsteps = memoData.totalsteps;
+  }
+
+  return output
+} */
 
 function printDataGroupedByDay(allData, shrinkFactor: number) {
   let dataGroupedByDay: Map<string, Array<any>> = new Map()
@@ -13,7 +45,14 @@ function printDataGroupedByDay(allData, shrinkFactor: number) {
   })
 
   dataGroupedByDay.forEach((value, key, map) => {
-    console.log("Total transactions on", key, "=", "|".repeat((value.length / shrinkFactor) + 1), value.length)
+    // We want a bar that fits on a single row
+    const maxBarLength = 45
+    let bar = "|".repeat(Math.min((value.length / shrinkFactor) + 1, maxBarLength))
+    // Signal that the bar should go beyond the row
+    if(bar.length === maxBarLength) {
+      bar = bar + "+" 
+    }
+    console.log("Total transactions on", key, "=", bar, value.length)
   })
 }
 
@@ -78,6 +117,23 @@ const command: GluegunCommand = {
     printDataGroupedByDay(allData, shrinkFactor)
 
     printLargestDestinations(allData)
+
+    // Send XRP unfortunately does not track interactions like this, but other tutorials do!
+    allData.forEach(tx => {
+      if(tx.Memos !== null && tx.Memos !== "null") {
+        console.log(tx.Memos)
+        console.log(tx)
+      }
+    })
+
+    const allSendXRPTransactions = []
+    allData.forEach((tx => {
+      if(tx.Amount === "22000000" && tx.Destination === "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe") {
+        allSendXRPTransactions.push(tx)
+      }
+    }))
+    console.log("JUST SEND XRP TRANSACTIONS:")
+    printDataGroupedByDay(allSendXRPTransactions, 5)
 
   }
 }
