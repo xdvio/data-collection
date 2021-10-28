@@ -5,6 +5,37 @@ import * as fs from 'fs'
 import { hasNextPage } from 'xrpl'
 import { DevnetDataFilename, TestnetDataFilename } from '../types'
 
+function decodeTutorialMemos(memos): 
+{ path: string, button: string, step: string, totalsteps: string } {
+  if(memos == null) {
+    return null
+  }
+
+  // Documented here: https://github.com/XRPLF/xrpl-dev-portal/blob/master/tool/INTERACTIVE_TUTORIALS_README.md#memos
+  const output = {
+    path: null,
+    button: null,
+    step: null,
+    totalsteps: null,
+  }
+
+  const memoData = JSON.parse(memos.MemoData)
+
+  if(memos.MemoType === 0x68747470733A2F2F6769746875622E636F6D2F5852504C462F7872706C2D6465762D706F7274616C2F626C6F622F6D61737465722F746F6F6C2F494E5445524143544956455F5455544F5249414C535F524541444D452E6D64) {
+    console.log("Tutorial transaction found!")
+    console.log(memoData)
+  }
+
+  if(memoData != null) {
+    output.path = memoData.path;
+    output.button = memoData.button;
+    output.step = memoData.step;
+    output.totalsteps = memoData.totalsteps;
+  }
+
+  return output
+}
+
 const command: GluegunCommand = {
   name: 'data-collection',
   run: async toolbox => {
@@ -79,7 +110,8 @@ const command: GluegunCommand = {
         Amount: "Amount" in transaction.tx ? transaction.tx.Amount : null,
         Destination: "Destination" in transaction.tx ? transaction.tx.Destination : null,
         delivered_amount: typeof transaction.meta === 'object' && "delivered_amount" in transaction.meta ? transaction.meta.delivered_amount : null,
-        date: "date" in transaction.tx ? (xrpl.rippleTimeToISOTime((transaction.tx as any).date).split("T")[0]) : null
+        date: "date" in transaction.tx ? (xrpl.rippleTimeToISOTime((transaction.tx as any).date).split("T")[0]) : null,
+        Memos: JSON.stringify(decodeTutorialMemos(transaction.tx.Memos))
       }
     })
 
