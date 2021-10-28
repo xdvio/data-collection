@@ -7,6 +7,7 @@ const command: GluegunCommand = {
   run: async toolbox => {
     const { print, parameters } = toolbox
 
+    // TODO: Add support for Devnet and test-net datasets as a parameter (Default to Testnet)
     if (parameters.first) {
         print.info(`${parameters.first}`)
         return
@@ -34,10 +35,19 @@ const command: GluegunCommand = {
     const uniqueDestinations = new Set(destinations)
     console.log(`Total unique addresses that interacted with the faucet = ${uniqueDestinations.size}`)
 
-    /*let dataGroupedByDay = {} 
+    let dataGroupedByDay: Map<string, Array<any>> = new Map()
     allData.forEach(result => {
-      dataGroupedByDay[result.date].push(result)
-    })*/
+      if(!dataGroupedByDay.get(result.date)) {
+        dataGroupedByDay.set(result.date, [])
+      }
+      dataGroupedByDay.get(result.date).push(result)
+    })
+
+    const shrinkFactor = 250
+    dataGroupedByDay.forEach((value, key, map) => {
+      console.log("Total transactions on", key, "=", "-".repeat(value.length / shrinkFactor), value.length)
+    })
+    console.log(dataGroupedByDay.entries.length)
     
 
 
