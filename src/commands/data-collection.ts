@@ -3,6 +3,7 @@ import * as xrpl from 'xrpl'
 import { ExportToCsv } from 'export-to-csv'
 import * as fs from 'fs'
 import { hasNextPage } from 'xrpl'
+import { DevnetDataFilename, TestnetDataFilename } from '../types'
 
 const command: GluegunCommand = {
   name: 'data-collection',
@@ -10,11 +11,11 @@ const command: GluegunCommand = {
     const { print, parameters } = toolbox
 
     let server = "wss://s.altnet.rippletest.net:51233"
-    let serverName = 'Testnet'
+    let dataFileName = TestnetDataFilename
     if(parameters.first === "dev") {
       console.log("Connecting to Devnet...")
       server = "wss://s.devnet.rippletest.net"
-      serverName = 'Devnet'
+      dataFileName = DevnetDataFilename
     } else {
       console.log("Connecting to Testnet...")
     }
@@ -82,17 +83,17 @@ const command: GluegunCommand = {
       }
     })
 
-    const fileName = serverName + "-transactions"
-
+    const csvExtension = '.csv'
+    const fileNameWithoutExtension = dataFileName.substring(0, dataFileName.length - csvExtension.length)
     const csvExporter = new ExportToCsv({
       showLabels: true,
-      filename: fileName,
+      filename: fileNameWithoutExtension,
       useKeysAsHeaders: true
     })
  
     const csvData = csvExporter.generateCsv(txs, true)
 
-    fs.writeFileSync(fileName + '.csv', csvData)
+    fs.writeFileSync(dataFileName, csvData)
 
     // Disconnect when done (If you omit this, Node.js won't end the process)
     await client.disconnect()
